@@ -82,18 +82,31 @@ export interface ComponentMetadata {
     /** Data on component's containing page, if component resides in a multi-page file */
     containing_page?: PageInfo;
 }
+/** A node containing a set of variants of a component */
+export declare type ComponentSetMetadata = ComponentMetadata;
 export interface StyleMetadata {
+    /** The unique identifier of the style */
     key: string;
+    /** The unique identifier of the file which contains the style */
     file_key: string;
+    /** Id of the style node within the figma file */
     node_id: string;
+    /** The type of style */
     style_type: StyleType;
+    /** URL link to the style's thumbnail image */
     thumbnail_url: string;
+    /** Name of the style */
     name: string;
+    /** The description of the style as entered by the publisher */
     description: string;
+    /** The UTC ISO 8601 time at which the style was created */
     updated_at: string;
+    /** The UTC ISO 8601 time at which the style was updated */
     created_at: string;
-    sort_position: string;
+    /** The user who last updated the style */
     user: User;
+    /** A user specified order number by which the style can be sorted */
+    sort_position: string;
 }
 export interface GetCommentsResult {
     comments: Comment[];
@@ -170,8 +183,17 @@ export interface GetTeamComponentsResult {
         [x: string]: number;
     };
 }
+export interface GetTeamComponentSetsResult {
+    components: ComponentSetMetadata[];
+    cursor: {
+        [x: string]: number;
+    };
+}
 export interface GetFileComponentsResult {
     components: ComponentMetadata[];
+}
+export interface GetFileComponentSetsResult {
+    components: ComponentSetMetadata[];
 }
 export interface GetTeamStylesResult {
     styles: StyleMetadata[];
@@ -182,6 +204,8 @@ export interface GetTeamStylesResult {
 export interface GetUserMeResult extends User {
 }
 export interface GetComponentResult extends ComponentMetadata {
+}
+export interface GetComponentSetResult extends ComponentSetMetadata {
 }
 export interface GetStyleResult extends StyleMetadata {
 }

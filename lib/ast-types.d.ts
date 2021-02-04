@@ -46,13 +46,21 @@ export declare enum TextCase {
     ORIGINAL = "ORIGINAL",
     UPPER = "UPPER",
     LOWER = "LOWER",
-    TITLE = "TITLE"
+    TITLE = "TITLE",
+    SMALL_CAPS = "SMALL_CAPS",
+    SMALL_CAPS_FORCED = "SMALL_CAPS_FORCED"
 }
 /** Text decoration applied to the node */
 export declare enum TextDecoration {
     NONE = "NONE",
     STRIKETHROUGH = "STRIKETHROUGH",
     UNDERLINE = "UNDERLINE"
+}
+/** Dimensions along which text will auto resize, default is that the text does not auto-resize. */
+export declare enum TextAutoResize {
+    NONE = "NONE",
+    HEIGHT = "HEIGHT",
+    WIDTH_AND_HEIGHT = "WIDTH_AND_HEIGHT"
 }
 /** The unit of the line height value specified by the user. */
 export declare enum LineHeightUnit {
@@ -174,6 +182,7 @@ export declare enum BlendMode {
  * "EASE_IN": Ease in with an animation curve similar to CSS ease-in.
  * "EASE_OUT": Ease out with an animation curve similar to CSS ease-out.
  * "EASE_IN_AND_OUT": Ease in and then out with an animation curve similar to CSS ease-in-out.
+ * "LINEAR": No easing, similar to CSS linear.
  */
 export declare enum EasingType {
     /** Ease in with an animation curve similar to CSS ease-in. */
@@ -181,7 +190,9 @@ export declare enum EasingType {
     /** Ease out with an animation curve similar to CSS ease-out. */
     EASE_OUT = "EASE_OUT",
     /** Ease in and then out with an animation curve similar to CSS ease-in-out. */
-    EASE_IN_AND_OUT = "EASE_IN_AND_OUT"
+    EASE_IN_AND_OUT = "EASE_IN_AND_OUT",
+    /** No easing, similar to CSS linear. */
+    LINEAR = "LINEAR"
 }
 export declare enum LayoutConstraintVertical {
     TOP = "TOP",
@@ -218,12 +229,21 @@ export declare type LayoutConstraint = {
      */
     horizontal: LayoutConstraintHorizontal;
 };
+export declare enum LayoutAlign {
+    /** Determines if the layer should stretch along the parent’s counter axis. This property is only provided for direct children of auto-layout frames. */
+    INHERIT = "INHERIT",
+    STRETCH = "STRETCH",
+    /** In horizontal auto-layout frames, "MIN" and "MAX" correspond to "TOP" and "BOTTOM". In vertical auto-layout frames, "MIN" and "MAX" correspond to "LEFT" and "RIGHT". */
+    MIN = "MIN",
+    CENTER = "CENTER",
+    MAX = "MAX"
+}
 export declare enum LayoutGridPattern {
     COLUMNS = "COLUMNS",
     ROWS = "ROWS",
     GRID = "GRID"
 }
-export declare enum LayoutGridAligment {
+export declare enum LayoutGridAlignment {
     MIN = "MIN",
     MAX = "MAX",
     CENTER = "CENTER"
@@ -249,7 +269,7 @@ export declare type LayoutGrid = {
      * "MAX": Grid starts at the right or bottom of the frame
      * "CENTER": Grid is center aligned
      */
-    alignment: LayoutGridAligment;
+    alignment: LayoutGridAlignment;
     /** Spacing in between columns and rows */
     gutterSize: number;
     /** Spacing before the first column or row */
@@ -257,6 +277,10 @@ export declare type LayoutGrid = {
     /** Number of columns or rows */
     count: number;
 };
+export declare enum AxisSizingMode {
+    FIXED = "FIXED",
+    AUTO = "AUTO"
+}
 export declare enum EffectType {
     INNER_SHADOW = "INNER_SHADOW",
     DROP_SHADOW = "DROP_SHADOW",
@@ -276,6 +300,8 @@ declare type EffectShadow_ = {
     blendMode: BlendMode;
     /** How far the shadow is projected in the x and y directions */
     offset: Vector;
+    /** default: 0. How far the shadow spreads */
+    spread: number;
 };
 export declare type EffectShadow = {
     type: EffectType.DROP_SHADOW | EffectType.INNER_SHADOW;
@@ -289,6 +315,14 @@ export declare type Effect = {
 } & Effect_ & Partial<EffectShadow_>;
 export declare function isEffectShadow(effect: Effect): effect is EffectShadow;
 export declare function isEffectBlur(effect: Effect): effect is EffectBlur;
+export declare type Hyperlink = {
+    /** Type of hyperlink */
+    type: 'URL' | 'NODE';
+    /** URL being linked to, if URL type */
+    url: string;
+    /** ID of frame hyperlink points to, if NODE type */
+    nodeID: string;
+};
 export declare enum PaintType {
     SOLID = "SOLID",
     GRADIENT_LINEAR = "GRADIENT_LINEAR",
@@ -305,9 +339,9 @@ export declare enum PaintSolidScaleMode {
     STRETCH = "STRETCH"
 }
 export declare type Paint_ = {
-    /** `default: true` Is the paint enabled? */
+    /** default: true. Is the paint enabled? */
     visible?: boolean;
-    /** `default: 1` Overall opacity of paint (colors within the paint can also have opacity values which would blend with this) */
+    /** default: 1. Overall opacity of paint (colors within the paint can also have opacity values which would blend with this) */
     opacity?: number;
 };
 declare type PaintSolid_ = {
@@ -331,12 +365,16 @@ declare type PaintGradient_ = {
 declare type PaintImage_ = {
     /** Image scaling mode */
     scaleMode: PaintSolidScaleMode;
-    /** Image reference, get it with `Api.getImage` */
-    imageRef: string;
     /** Affine transform applied to the image, only present if scaleMode is STRETCH */
     imageTransform?: Transform;
     /** Amount image is scaled by in tiling, only present if scaleMode is TILE */
     scalingFactor?: number;
+    /** Image rotation, in degrees. */
+    rotation: number;
+    /** A reference to an image embedded in this node. To download the image using this reference, use the GET file images endpoint to retrieve the mapping from image references to image URLs */
+    imageRef: string;
+    /** A reference to the GIF embedded in this node, if the image is a GIF. To download the image using this reference, use the GET file images endpoint to retrieve the mapping from image references to image URLs */
+    gifRef: string;
 };
 export declare type PaintSolid = {
     type: PaintType.SOLID;
@@ -362,7 +400,18 @@ export declare type Vector = {
     y: number;
 };
 /** A 2x3 2D affine transformation matrix */
-export declare type Transform = [[number, number, number], [number, number, number]];
+export declare type Transform = [
+    [
+        number,
+        number,
+        number
+    ],
+    [
+        number,
+        number,
+        number
+    ]
+];
 export declare enum PathWindingRule {
     EVENODD = "EVENODD",
     NONZERO = "NONZERO"
@@ -408,6 +457,8 @@ export declare type TypeStyle = {
     textCase?: TextCase;
     /** Text decoration applied to the node, default is `NONE` */
     textDecoration?: TextDecoration;
+    /** Dimensions along which text will auto resize, default is that the text does not auto-resize. Default is `NONE` */
+    textAutoResize?: 'NONE' | 'HEIGHT' | 'WIDTH_AND_HEIGHT';
     /** Horizontal text alignment as string enum */
     textAlignHorizontal: 'LEFT' | 'RIGHT' | 'CENTER' | 'JUSTIFIED';
     /** Vertical text alignment as string enum */
@@ -416,10 +467,16 @@ export declare type TypeStyle = {
     letterSpacing: number;
     /** Paints applied to characters */
     fills: Paint[];
+    /** Link to a URL or frame */
+    hyperlink: Hyperlink;
+    /** A map of OpenType feature flags to 1 or 0, 1 if it is enabled and 0 if it is disabled. Note that some flags aren't reflected here. For example, SMCP (small caps) is still represented by the textCase field. */
+    opentypeFlags: {
+        [flag: string]: number;
+    };
     /** Line height in px */
     lineHeightPx: number;
-    /** Line height as a percentage of normal line height */
-    lineHeightPercent: number;
+    /** @deprecated Line height as a percentage of normal line height. This is deprecated; in a future version of the API only lineHeightPx and lineHeightPercentFontSize will be returned. */
+    lineHeightPercent?: number;
     /** Line height as a percentage of the font size. Only returned when lineHeightPercent is not 100 */
     lineHeightPercentFontSize?: number;
     /** The unit of the line height value specified by the user. */
@@ -461,6 +518,8 @@ export interface Style {
     key: string;
     /** The name of the style */
     name: string;
+    /** The description of the style */
+    description: string;
     /** The type of style */
     style_type: StyleType;
 }
@@ -475,10 +534,10 @@ export interface CANVAS {
     children: Node[];
     /** Background color of the canvas */
     backgroundColor: Color;
-    /** default: [] An array of export settings representing images to export from the canvas */
-    exportSettings: ExportSetting[];
     /** Node ID that corresponds to the start frame for prototypes */
     prototypeStartNodeID?: string | null;
+    /** default: [] An array of export settings representing images to export from the canvas */
+    exportSettings: ExportSetting[];
 }
 /** A node of fixed size containing other nodes */
 export interface FRAME {
@@ -486,10 +545,22 @@ export interface FRAME {
     children: Node[];
     /** If true, layer is locked and cannot be edited, default `false` */
     locked?: boolean;
-    /** Background of the node */
+    /** @deprecated Background of the node. This is deprecated, as backgrounds for frames are now in the fills field. */
     background: Paint[];
-    /** Background color of the node. This is deprecated, as frames now support more than a solid color as a background. Please use the background field instead. */
+    /** @deprecated Background color of the node. This is deprecated, as frames now support more than a solid color as a background. Please use the background field instead. */
     backgroundColor?: Color;
+    /** An array of fill paints applied to the node */
+    fills: Paint[];
+    /** An array of stroke paints applied to the node */
+    strokes: Paint[];
+    /** The weight of strokes on the node */
+    strokeWeight: number;
+    /** Position of stroke relative to vector outline, as a string enum */
+    strokeAlign: StrokeAlign;
+    /** Radius of each corner of the frame if a single radius is set for all corners */
+    cornerRadius: number;
+    /** Array of length 4 of the radius of each corner of the rectangle, starting in the top left and proceeding clockwise */
+    rectangleCornerRadii: [number, number, number, number];
     /** default: [] An array of export settings representing images to export from node */
     exportSettings: ExportSetting[];
     /** How this node blends with nodes behind it in the scene (see blend mode section for more details) */
@@ -498,6 +569,8 @@ export interface FRAME {
     preserveRatio: boolean;
     /** Horizontal and vertical layout constraints for node */
     constraints: LayoutConstraint;
+    /** Determines if the layer should stretch along the parent’s counter axis. This property is only provided for direct children of auto-layout frames. */
+    layoutAlign: LayoutAlign;
     /** default: null Node ID of node to transition to in prototyping */
     transitionNodeID?: string | null;
     /** default: null The duration of the prototyping transition on this node (in milliseconds). */
@@ -514,6 +587,32 @@ export interface FRAME {
     relativeTransform?: Transform;
     /** Does this node clip content outside of its bounds? */
     clipsContent: boolean;
+    /** Whether this layer uses auto-layout to position its children. default NONE */
+    layoutMode: 'NONE' | 'HORIZONTAL' | 'VERTICAL';
+    /** Whether the primary axis has a fixed length (determined by the user) or an automatic length (determined by the layout engine). This property is only applicable for auto-layout frames. Default AUTO */
+    primaryAxisSizingMode: AxisSizingMode;
+    /** Whether the counter axis has a fixed length (determined by the user) or an automatic length (determined by the layout engine). This property is only applicable for auto-layout frames. Default AUTO */
+    counterAxisSizingMode: AxisSizingMode;
+    /** Determines how the auto-layout frame’s children should be aligned in the primary axis direction. This property is only applicable for auto-layout frames. Default MIN */
+    primaryAxisAlignItems: 'MIN' | 'CENTER' | 'MAX' | 'SPACE_BETWEEN';
+    /** Determines how the auto-layout frame’s children should be aligned in the counter axis direction. This property is only applicable for auto-layout frames. Default MIN */
+    counterAxisAlignItems: 'MIN' | 'CENTER' | 'MAX';
+    /** default: 0. The padding between the left border of the frame and its children. This property is only applicable for auto-layout frames. */
+    paddingLeft: number;
+    /** default: 0. The padding between the right border of the frame and its children. This property is only applicable for auto-layout frames. */
+    paddingRight: number;
+    /** default: 0. The padding between the top border of the frame and its children. This property is only applicable for auto-layout frames. */
+    paddingTop: number;
+    /** default: 0. The padding between the bottom border of the frame and its children. This property is only applicable for auto-layout frames. */
+    paddingBottom: number;
+    /** @deprecated default: 0. The horizontal padding between the borders of the frame and its children. This property is only applicable for auto-layout frames. Deprecated in favor of setting individual paddings. */
+    horizontalPadding: number;
+    /** @deprecated default: 0. The vertical padding between the borders of the frame and its children. This property is only applicable for auto-layout frames. Deprecated in favor of setting individual paddings. */
+    verticalPadding: number;
+    /** default: 0. The distance between children of the frame. This property is only applicable for auto-layout frames. */
+    itemSpacing: number;
+    /** Defines the scrolling behavior of the frame, if there exist contents outside of the frame boundaries. The frame can either scroll vertically, horizontally, or in both directions to the extents of the content contained within it. This behavior can be observed in a prototype. Default NONE */
+    overflowDirection: 'NONE' | 'HORIZONTAL_SCROLLING' | 'VERTICAL_SCROLLING' | 'HORIZONTAL_AND_VERTICAL_SCROLLING';
     /** default: [] An array of layout grids attached to this node (see layout grids section for more details). GROUP nodes do not have this attribute */
     layoutGrids?: LayoutGrid[];
     /** default: [] An array of effects attached to this node (see effects section for more details) */
@@ -527,43 +626,54 @@ export interface FRAME {
 export declare type GROUP = FRAME;
 /** A vector network, consisting of vertices and edges */
 export interface VECTOR {
-    /** default: [] An array of export settings representing images to export from node */
-    exportSettings: ExportSetting[];
     /** If true, layer is locked and cannot be edited, default `false` */
     locked?: boolean;
+    /** default: [] An array of export settings representing images to export from node */
+    exportSettings: ExportSetting[];
     /** How this node blends with nodes behind it in the scene (see blend mode section for more details) */
     blendMode: BlendMode;
     /** default: false Keep height and width constrained to same ratio */
     preserveRatio?: boolean;
+    /** Determines if the layer should stretch along the parent’s counter axis. This property is only provided for direct children of auto-layout frames. */
+    layoutAlign: LayoutAlign;
+    /** default: 0. This property is applicable only for direct children of auto-layout frames, ignored otherwise. Determines whether a layer should stretch along the parent’s primary axis. A 0 corresponds to a fixed size and 1 corresponds to stretch. */
+    layoutGrow?: number;
     /** Horizontal and vertical layout constraints for node */
     constraints: LayoutConstraint;
-    /** default: null Node ID of node to transition to in prototyping */
+    /** default: null. Node ID of node to transition to in prototyping */
     transitionNodeID?: string | null;
-    /** default: null The duration of the prototyping transition on this node (in milliseconds). */
+    /** default: null. The duration of the prototyping transition on this node (in milliseconds). */
     transitionDuration?: number | null;
-    /** default: null The easing curve used in the prototyping transition on this node. */
+    /** default: null. The easing curve used in the prototyping transition on this node. */
     transitionEasing?: EasingType | null;
-    /** default: 1 Opacity of the node */
+    /** default: 1. Opacity of the node */
     opacity?: number;
     /** Bounding box of the node in absolute space coordinates */
     absoluteBoundingBox: Rectangle;
+    /** default: []. An array of effects attached to this node (see effects section for more details) */
+    effects?: Effect[];
     /** Width and height of element. This is different from the width and height of the bounding box in that the absolute bounding box represents the element after scaling and rotation. Only present if geometry=paths is passed */
     size?: Vector;
     /** The top two rows of a matrix that represents the 2D transform of this node relative to its parent. The bottom row of the matrix is implicitly always (0, 0, 1). Use to transform coordinates in geometry. Only present if geometry=paths is passed */
     relativeTransform?: Transform;
-    /** default: [] An array of effects attached to this node (see effects section for more details) */
-    effects?: Effect[];
-    /** default: false Does this node mask sibling nodes in front of it? */
+    /** default: false. Does this node mask sibling nodes in front of it? */
     isMask?: boolean;
-    /** default: [] An array of fill paints applied to the node */
+    /** default: []. An array of fill paints applied to the node */
     fills: Paint[];
     /** Only specified if parameter geometry=paths is used. An array of paths representing the object fill */
     fillGeometry?: Path[];
-    /** default: [] An array of stroke paints applied to the node */
+    /** default: []. An array of stroke paints applied to the node */
     strokes: Paint[];
     /** The weight of strokes on the node */
     strokeWeight: number;
+    /** default: NONE. A string enum with value of "NONE", "ROUND", "SQUARE", "LINE_ARROW", or "TRIANGLE_ARROW", describing the end caps of vector paths. */
     strokeCap?: StrokeCap;
+    /** A string enum with value of "MITER", "BEVEL", or "ROUND", describing how corners in vector paths are rendered. */
+    strokeJoin?: StrokeJoin;
+    /** An array of floating point numbers describing the pattern of dash length and gap lengths that the vector path follows. For example a value of [1, 2] indicates that the path has a dash of length 1 followed by a gap of length 2, repeated. */
+    strokeDashes?: number[];
+    /** Only valid if strokeJoin is "MITER". The corner angle, in degrees, below which strokeJoin will be set to "BEVEL" to avoid super sharp corners. By default this is 28.96 degrees. */
+    strokeMiterAngle?: number;
     /** Only specified if parameter geometry=paths is used. An array of paths representing the object stroke */
     strokeGeometry?: Path[];
     /** Where stroke is drawn relative to the vector outline as a string enum
@@ -571,12 +681,6 @@ export interface VECTOR {
     "OUTSIDE": draw stroke outside the shape boundary
     "CENTER": draw stroke centered along the shape boundary */
     strokeAlign: StrokeAlign;
-    /** A string enum with value of "MITER", "BEVEL", or "ROUND", describing how corners in vector paths are rendered. */
-    strokeJoin?: StrokeJoin;
-    /** An array of floating point numbers describing the pattern of dash length and gap lengths that the vector path follows. For example a value of [1, 2] indicates that the path has a dash of length 1 followed by a gap of length 2, repeated. */
-    strokeDashes?: number[];
-    /** Only valid if strokeJoin is "MITER". The corner angle, in degrees, below which strokeJoin will be set to "BEVEL" to avoid super sharp corners. By default this is 28.96 degrees. */
-    strokeMiterAngle?: number;
     /** A mapping of a StyleType to style ID (see Style) of styles present on this node. The style ID can be used to look up more information about the style in the top-level styles field. */
     styles?: StylesMap;
 }
@@ -613,7 +717,7 @@ export declare type TEXT = VECTOR & {
     characters: string;
     /** Style of text including font family and weight (see type style section for more information) */
     style: TypeStyle;
-    /** Array with same number of elements as characeters in text box, each element is a reference to the styleOverrideTable defined below and maps to the corresponding character in the characters field. Elements with value 0 have the default type style */
+    /** Array with same number of elements as characters in text box, each element is a reference to the styleOverrideTable defined below and maps to the corresponding character in the characters field. Elements with value 0 have the default type style */
     characterStyleOverrides: number[];
     /** Map from ID to TypeStyle for looking up style overrides */
     styleOverrideTable: {
@@ -633,6 +737,8 @@ export interface SLICE {
 }
 /** A node that can have instances created of it that share the same properties */
 export declare type COMPONENT = FRAME;
+/** A node containing a set of variants of a component */
+export declare type COMPONENT_SET = FRAME;
 /** An instance of a component, changes to the component result in the same changes applied to the instance */
 export declare type INSTANCE<ComponentID = string> = FRAME & {
     /** ID of component that this instance came from, refers to components table (see endpoints section below) */
@@ -668,6 +774,8 @@ export declare type NodeTypes = {
     SLICE: SLICE;
     /** A node that can have instances created of it that share the same properties */
     COMPONENT: COMPONENT;
+    /** A node containing a set of variants of a component */
+    COMPONENT_SET: COMPONENT_SET;
     /** An instance of a component, changes to the component result in the same changes applied to the instance */
     INSTANCE: INSTANCE;
 };
@@ -677,6 +785,8 @@ export declare type Node<NType extends NodeType = NodeType> = {
     name: string;
     visible: boolean;
     type: NType;
+    pluginData: any;
+    sharedPluginData: any;
 } & NodeTypes[NType];
 export declare function isNodeType<NType extends NodeType, R = Node<NType>>(node: Node<any>, type: NType): node is R;
 export {};
