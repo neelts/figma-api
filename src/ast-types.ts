@@ -657,6 +657,8 @@ export interface FRAME {
     constraints: LayoutConstraint;
     /** Determines if the layer should stretch along the parent’s counter axis. This property is only provided for direct children of auto-layout frames. */
     layoutAlign: LayoutAlign;
+    /** default: 0. This property is applicable only for direct children of auto-layout frames, ignored otherwise. Determines whether a layer should stretch along the parent’s primary axis. A 0 corresponds to a fixed size and 1 corresponds to stretch. */
+    layoutGrow?: number;
     /** default: null Node ID of node to transition to in prototyping */
     transitionNodeID?: string|null;
     /** default: null The duration of the prototyping transition on this node (in milliseconds). */
