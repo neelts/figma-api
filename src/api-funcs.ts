@@ -123,6 +123,7 @@ export function postCommentsApi(
     return this.request<PostCommentResult>(`${API_DOMAIN}/${API_VER}/files/${file_key}/comments`, {
         method: 'POST',
         data: JSON.stringify(body),
+        headers: { 'Content-Type': 'application/json' },
     });
 }
 
